@@ -1,23 +1,44 @@
-// استبدل جزء الـ fetchStudents في الكود القديم بهذا الكود المحدث
-async function fetchStudents() {
-    try {
-        const { data, error } = await supabase.from('students').select('*');
-        
-        if (error) {
-            console.error("خطأ من Supabase:", error);
-            document.getElementById('students-list').innerHTML = `<li class="p-2 text-red-500">حدث خطأ: ${error.message}</li>`;
-            return;
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جواز تنموي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-2xl font-bold text-center mb-4">قائمة الطلاب</h1>
+        <ul id="students-list" class="space-y-2 text-right">
+            <li class="p-2">جاري التحميل...</li>
+        </ul>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://jtaflotguhzctzrszlwu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_rqMvgw_B25Q8pnp8kqTR5w_1axGCpxA';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function fetchStudents() {
+            const list = document.getElementById('students-list');
+            const { data, error } = await supabase.from('students').select('*');
+            
+            if (error) {
+                list.innerHTML = `<li class="text-red-500">خطأ: ${error.message}</li>`;
+                return;
+            }
+            
+            if (!data || data.length === 0) {
+                list.innerHTML = `<li class="p-2 text-gray-500">الجدول فارغ، أضف طالباً من Supabase</li>`;
+                return;
+            }
+            
+            list.innerHTML = data.map(s => 
+                `<li class="p-2 border-b font-bold">${s.full_name || 'بدون اسم'} : ${s.points || 0} نقطة</li>`
+            ).join('');
         }
 
-        if (data.length === 0) {
-            document.getElementById('students-list').innerHTML = `<li class="p-2">الجدول فارغ في قاعدة البيانات.</li>`;
-            return;
-        }
-
-        document.getElementById('students-list').innerHTML = data.map(s => 
-            `<li class="p-2 border-b">${s.full_name || 'بدون اسم'} - ${s.points || 0} نقطة</li>`
-        ).join('');
-    } catch (e) {
-        console.error("خطأ عام:", e);
-    }
-}
+        fetchStudents();
+    </script>
+</body>
+</html>
